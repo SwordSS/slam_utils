@@ -1,0 +1,40 @@
+# 激光配准
+### 资料
+- https://zhuanlan.zhihu.com/p/63964953
+  - 里面有github与ICP自己实现
+- https://zhuanlan.zhihu.com/p/66419249
+  - 介绍了一些点云配准的方法
+- https://zhuanlan.zhihu.com/p/107218828
+  - ICP推导过程
+- https://zhuanlan.zhihu.com/p/268524083
+  - PCL学习指南&资料推荐（2021版）
+- https://github.com/ccny-ros-pkg/scan_tools
+  - scan_tools
+- https://blog.csdn.net/shoufei403/article/details/102972842
+  - ICP,PL-ICP,NICP,IMLS-ICP
+- https://blog.csdn.net/robinvista/article/details/104379087
+  - LOAM，NICP
+- https://blog.csdn.net/tiancailx/article/details/110502471
+  - liosam特征提取
+
+### 计划
+- 激光配准的常用方法集合
+  - feture
+    - ICP
+      - PCL(官方教程)
+        - pcl::IterativeClosestPoint()
+        - pcl::IterativeClosestPointNonLinear()
+    - polar_scan_matcher
+      - scan_tools里有
+    - PL-ICP(CSM)
+      - https://censi.science/software/csm/
+    - PP-ICP
+    - NDT
+      - pcl::NormalDistributionsTransform
+    - FPFH（快速匹配直方图）
+      - pcl::SampleConsensusPrerejective
+  - grid
+    - 激光与栅格地图
+      - hector
+      - karto
+- 根据每种方法至少实现PCL官方或自行实现
