@@ -1,0 +1,8 @@
+prefix=/home/yyj/coding_ws/src/slam_utils/scan_registration/build/devel
+
+Name: scan_registration
+Description: Description of scan_registration
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

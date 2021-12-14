@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(scan_registration)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -10,8 +10,17 @@ project(scan_registration)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  sensor_msgs
+  geometry_msgs
+  tf2
+  tf2_geometry_msgs
+  tf2_ros
 )
 
+find_package(Eigen3 REQUIRED)
+
+find_package(PkgConfig)
+pkg_check_modules(csm REQUIRED csm)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -115,9 +124,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
+  ${csm_INCLUDE_DIRS} 
 )
+
+link_directories(${csm_LIBRARY_DIRS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -132,7 +145,27 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/scan_registration_node.cpp)
+
+#测试工厂模式
+# add_executable(TestFactory 
+#                 test/TestFactory.cpp
+#                 src/ScanOdom/ScanRegisWithPLICP.cpp
+#                 )
+# target_link_libraries(TestFactory
+#    ${catkin_LIBRARIES}
+# )
+
+#测试激光里程计
+add_executable(TestScanOdom 
+                test/TestScanOdom.cpp
+                src/ScanRegis/ScanRegisFactory.cpp
+                src/ScanOdom/ScanOdom.cpp
+                src/ScanOdom/ScanRegisWithPLICP.cpp
+                )
+target_link_libraries(TestScanOdom
+   ${catkin_LIBRARIES}
+   ${csm_LIBRARIES}
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

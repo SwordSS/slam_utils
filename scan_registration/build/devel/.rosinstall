@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/yyj/coding_ws/src/slam_utils/scan_registration/build/devel/setup.sh
