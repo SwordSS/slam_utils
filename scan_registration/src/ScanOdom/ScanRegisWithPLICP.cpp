@@ -17,53 +17,44 @@ ScanRegisWithPLICP::ScanRegisWithPLICP()
 
 void ScanRegisWithPLICP::Init(const sensor_msgs::LaserScan::ConstPtr& cur_scan_msg)
 {
-    current_time_ = cur_scan_msg->header.stamp;
-    last_icp_time_ = current_time_;
     CreateCache(cur_scan_msg);
 }
 
-void ScanRegisWithPLICP::ScanMatch(
-    const sensor_msgs::LaserScan::ConstPtr& last_scan_msg,
-    const sensor_msgs::LaserScan::ConstPtr& cur_scan_msg,
-    Eigen::Matrix4d& transform )
+void UpdateRefScan(const sensor_msgs::LaserScan::ConstPtr& ref_scan_msg)
 {
-    
-    current_time_ = cur_scan_msg->header.stamp;
-    LDP prev_ldp_scan_;
-    LDP curr_ldp_scan;
-    
-    LaserScanToLDP(last_scan_msg, prev_ldp_scan_);
-    LaserScanToLDP(cur_scan_msg, curr_ldp_scan);
-    std::cout << "go0" <<std::endl;
+    m_ref_scan_msg = ref_scan_msg;
+    LDP new_ldp_ref_scan;
+    LaserScanToLDP(m_ref_scan_msg, new_ldp_ref_scan);
+    ld_free(m_ldp_ref_scan);
+    m_ldp_ref_scan = new_ldp_ref_scan;
+}
 
-    prev_ldp_scan_->odometry[0] = 0.0;
-    prev_ldp_scan_->odometry[1] = 0.0;
-    prev_ldp_scan_->odometry[2] = 0.0;
+void ScanMatch(
+    const sensor_msgs::LaserScan::ConstPtr& cur_scan_msg,
+    Egien::Vector3d& predict_motion,
+    Eigen::Vector3d& real_motion )
+{
+    LDP ldp_cur_scan;
+    LaserScanToLDP(cur_scan_msg, ldp_cur_scan);
 
-    prev_ldp_scan_->estimate[0] = 0.0;
-    prev_ldp_scan_->estimate[1] = 0.0;
-    prev_ldp_scan_->estimate[2] = 0.0;
+    m_ldp_ref_scan->odometry[0] = 0.0;
+    m_ldp_ref_scan->odometry[1] = 0.0;
+    m_ldp_ref_scan->odometry[2] = 0.0;
 
-    prev_ldp_scan_->true_pose[0] = 0.0;
-    prev_ldp_scan_->true_pose[1] = 0.0;
-    prev_ldp_scan_->true_pose[2] = 0.0;
-    std::cout << "go1" <<std::endl;
+    m_ldp_ref_scan->estimate[0] = 0.0;
+    m_ldp_ref_scan->estimate[1] = 0.0;
+    m_ldp_ref_scan->estimate[2] = 0.0;
 
-    input_.laser_ref = prev_ldp_scan_;
-    input_.laser_sens = curr_ldp_scan;
-    std::cout << "go2" <<std::endl;
+    m_ldp_ref_scan->true_pose[0] = 0.0;
+    m_ldp_ref_scan->true_pose[1] = 0.0;
+    m_ldp_ref_scan->true_pose[2] = 0.0;
 
-    // 匀速模型，速度乘以时间，得到预测的odom坐标系下的位姿变换
-    double dt = (current_time_ - last_icp_time_).toSec();
-    double pr_ch_x, pr_ch_y, pr_ch_a;
-    GetPrediction(pr_ch_x, pr_ch_y, pr_ch_a, dt);
+    input_.laser_ref = m_ldp_ref_scan;
+    input_.laser_sens = ldp_cur_scan;
 
-    tf2::Transform prediction_change;
-    CreateTfFromXYTheta(pr_ch_x, pr_ch_y, pr_ch_a, prediction_change);
-
-    input_.first_guess[0] = prediction_change.getOrigin().getX();
-    input_.first_guess[1] = prediction_change.getOrigin().getY();
-    input_.first_guess[2] = tf2::getYaw(prediction_change.getRotation());
+    input_.first_guess[0] = predict_motion[0];
+    input_.first_guess[1] = predict_motion[1];
+    input_.first_guess[2] = predict_motion[2];
     
     // If they are non-Null, free covariance gsl matrices to avoid leaking memory
     if (output_.cov_x_m)
@@ -85,33 +76,10 @@ void ScanRegisWithPLICP::ScanMatch(
     // 调用csm进行plicp计算
     sm_icp(&input_, &output_);
 
-
-    tf2::Transform corr_ch;
-
-    
-    if (output_.valid)
-    {
-
-        // 雷达坐标系下的坐标变换
-        tf2::Transform corr_ch_l;
-        CreateTfFromXYTheta(output_.x[0], output_.x[1], output_.x[2], corr_ch_l);
-        PublishTFAndOdometry(corr_ch_l);
-
-        latest_velocity_.linear.x = corr_ch_l.getOrigin().getX() / dt;
-        latest_velocity_.angular.z = tf2::getYaw(corr_ch_l.getRotation()) / dt;
-    }
-    else
-    {
-        ROS_WARN("not Converged");
-    }
-
-    // 发布tf与odom话题
-    
-
-    ld_free(prev_ldp_scan_);
-    prev_ldp_scan_ = curr_ldp_scan;
-
-    last_icp_time_ = current_time_;
+    real_motion[0] = output_.x[0];
+    real_motion[1] = output_.x[1];
+    real_motion[2] = output_.x[2];
+    ld_free(ldp_cur_scan);
 } 
 
 
@@ -247,23 +215,6 @@ void ScanRegisWithPLICP::InitParams()
         input_.use_sigma_weights = 0;
 }
 
-void ScanRegisWithPLICP::CreateCache(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
-{
-    a_cos_.clear();
-    a_sin_.clear();
-    double angle;
-
-    for (unsigned int i = 0; i < scan_msg->ranges.size(); i++)
-    {
-        angle = scan_msg->angle_min + i * scan_msg->angle_increment;
-        a_cos_.push_back(cos(angle));
-        a_sin_.push_back(sin(angle));
-    }
-
-    input_.min_reading = scan_msg->range_min;
-    input_.max_reading = scan_msg->range_max;
-}
-
 void ScanRegisWithPLICP::LaserScanToLDP(const sensor_msgs::LaserScan::ConstPtr &scan_msg, LDP &ldp)
 {
     unsigned int n = scan_msg->ranges.size();
@@ -309,9 +260,9 @@ void ScanRegisWithPLICP::GetPrediction(double &prediction_change_x,
                                    double dt)
 {
     // 速度小于 1e-6 , 则认为是静止的
-    prediction_change_x = latest_velocity_.linear.x < 1e-6 ? 0.0 : dt * latest_velocity_.linear.x;
-    prediction_change_y = latest_velocity_.linear.y < 1e-6 ? 0.0 : dt * latest_velocity_.linear.y;
-    prediction_change_angle = latest_velocity_.linear.z < 1e-6 ? 0.0 : dt * latest_velocity_.linear.z;
+    prediction_change_x = m_latest_velocity.linear.x < 1e-6 ? 0.0 : dt * m_latest_velocity.linear.x;
+    prediction_change_y = m_latest_velocity.linear.y < 1e-6 ? 0.0 : dt * m_latest_velocity.linear.y;
+    prediction_change_angle = m_latest_velocity.linear.z < 1e-6 ? 0.0 : dt * m_latest_velocity.linear.z;
 
     if (prediction_change_angle >= M_PI)
         prediction_change_angle -= 2.0 * M_PI;
@@ -331,11 +282,11 @@ void ScanRegisWithPLICP::PublishTFAndOdometry(tf2::Transform& base_in_odom_)
 {
 
     nav_msgs::Odometry odom_msg;
-    odom_msg.header.stamp = current_time_;
+    odom_msg.header.stamp = m_current_time;
     odom_msg.header.frame_id = odom_frame_;
     odom_msg.child_frame_id = base_frame_;
     tf2::toMsg(base_in_odom_, odom_msg.pose.pose);
-    odom_msg.twist.twist = latest_velocity_;
+    odom_msg.twist.twist = m_latest_velocity;
 
     // 发布 odomemtry 话题
     odom_publisher_.publish(odom_msg);

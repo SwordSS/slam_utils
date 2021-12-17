@@ -12,8 +12,8 @@ public:
     virtual ~ScanRegisBase(){};
     virtual void Init()=0;
     virtual void Init(const sensor_msgs::LaserScan::ConstPtr& cur_scan_msg)=0;
+    virtual void UpdateRefScan(const sensor_msgs::LaserScan::ConstPtr& ref_scan_msg)=0;
     virtual void ScanMatch(
-        const sensor_msgs::LaserScan::ConstPtr& last_scan_msg,
         const sensor_msgs::LaserScan::ConstPtr& cur_scan_msg,
         Eigen::Matrix4d& transform )=0;
     

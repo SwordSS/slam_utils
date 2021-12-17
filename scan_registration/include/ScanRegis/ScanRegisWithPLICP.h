@@ -21,10 +21,11 @@ public:
     ~ScanRegisWithPLICP(){};
     virtual void Init(){};
     void Init(const sensor_msgs::LaserScan::ConstPtr& cur_scan_msg);
+    void UpdateRefScan(const sensor_msgs::LaserScan::ConstPtr& ref_scan_msg);
     void ScanMatch(
-        const sensor_msgs::LaserScan::ConstPtr& last_scan_msg,
         const sensor_msgs::LaserScan::ConstPtr& cur_scan_msg,
-        Eigen::Matrix4d& transform );
+        Egien::Vector3d& predict_motion,
+        Eigen::Vector3d& real_motion );
 private:
     void InitParams();
     void CreateCache(const sensor_msgs::LaserScan::ConstPtr &scan_msg);
@@ -40,14 +41,14 @@ private:
     sm_params input_;
     sm_result output_;
 
-    std::vector<double> a_cos_;
-    std::vector<double> a_sin_;
+    sensor_msgs::LaserScan::ConstPtr m_ref_scan_msg;
+    LDP m_ldp_ref_scan;
+
+    ros::Time m_last_time;
+    ros::Time m_current_time;
 
     //不一定用
     ros::Publisher odom_publisher_;   
-
-    ros::Time last_icp_time_;
-    ros::Time current_time_;
 
     std::string odom_frame_;
     std::string base_frame_;
@@ -58,7 +59,7 @@ private:
     int kf_scan_count_;
     int scan_count_;
 
-    geometry_msgs::Twist latest_velocity_;
+    geometry_msgs::Twist m_latest_velocity;
 
 };
 
