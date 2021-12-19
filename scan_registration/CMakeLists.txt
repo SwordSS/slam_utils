@@ -12,8 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   geometry_msgs
-  tf2
-  tf2_geometry_msgs
   tf2_ros
 )
 
