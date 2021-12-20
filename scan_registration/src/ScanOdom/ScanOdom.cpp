@@ -23,6 +23,7 @@ ScanOdom::ScanOdom()
     scan_regis_base = ScanRegisFactory::CreateScanRegisMethod(ScanRegisFactory::PLICP);
     m_base_in_odom = Eigen::Matrix4d::Identity();
     scan_odom_status = Initialzing;
+    running_flag = 1;
 }
 
 void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
@@ -38,11 +39,14 @@ void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
     else if(scan_odom_status == Initialzed)
     {
         Eigen::Vector3d predict_motion;
-        predict_motion << 0,0,0;
+        Prediction(scan_msg,predict_motion);
+
         Eigen::Vector3d real_motion;
         bool result_flag = scan_regis_base->ScanMatch(scan_msg,predict_motion,real_motion);
+
         if (result_flag)
         {
+            UpdateVelocity(scan_msg,real_motion);
             Eigen::Matrix4d robot_motion;
             VectorToTranform(real_motion,robot_motion);
             m_base_in_odom = m_base_in_odom * robot_motion;
@@ -69,5 +73,37 @@ void ScanOdom::PublishMsg(const Eigen::Matrix4d& real_motion,ros::Time scan_time
     tf_odom_to_base.transform.rotation.w = q_v.w();
 
     tf_broadcaster.sendTransform(tf_odom_to_base);
+
+}
+
+void ScanOdom::Prediction(const sensor_msgs::LaserScan::ConstPtr &scan_msg,Eigen::Vector3d& predict_motion)
+{
+    double cur_time = scan_msg->header.stamp.toSec();
+    if(running_flag==0)
+    {
+        predict_motion = Eigen::Vector3d::Zero();
+        return;
+    }
+    else if(running_flag==1)
+    {
+        predict_motion = last_velocity*(cur_time - last_time);
+    }
+}
+
+void ScanOdom::UpdateVelocity(const sensor_msgs::LaserScan::ConstPtr &scan_msg,const Eigen::Vector3d& real_motion)
+{
+    double cur_time = scan_msg->header.stamp.toSec();
+    if(running_flag==0)
+    {
+        last_velocity = Eigen::Vector3d::Zero();
+        last_time = scan_msg->header.stamp.toSec();
+        running_flag = 1;
+    }
+    else if(running_flag==1)
+    {
+        last_velocity = real_motion/(cur_time - last_time);
+        last_time = scan_msg->header.stamp.toSec();
+    }
+    
 
 }

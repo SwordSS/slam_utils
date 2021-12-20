@@ -34,6 +34,8 @@ public:
     void PublishTFAndOdometry();
 private:
     void PublishMsg(const Eigen::Matrix4d& real_motion,ros::Time scan_time);
+    void Prediction(const sensor_msgs::LaserScan::ConstPtr &scan_msg,Eigen::Vector3d& predict_motion);
+    void UpdateVelocity(const sensor_msgs::LaserScan::ConstPtr &scan_msg,const Eigen::Vector3d& real_motion);
 private:
     ros::Subscriber m_scan_sub;
     ros::Publisher  m_odom_pub;
@@ -42,6 +44,11 @@ private:
     ScanOdomStatus scan_odom_status;
     Eigen::Matrix4d m_base_in_odom;
     tf2_ros::TransformBroadcaster tf_broadcaster;
+
+    int running_flag;
+    Eigen::Vector3d last_velocity;
+    double last_time;
+
 };
 
 
