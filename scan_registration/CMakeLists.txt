@@ -159,6 +159,7 @@ add_executable(TestScanOdom
                 src/ScanRegis/ScanRegisFactory.cpp
                 src/ScanOdom/ScanOdom.cpp
                 src/ScanOdom/ScanRegisWithPLICP.cpp
+                src/PoseExtrapolator/PoseExtrapolator.cpp
                 )
 target_link_libraries(TestScanOdom
    ${catkin_LIBRARIES}

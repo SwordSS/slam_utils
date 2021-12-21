@@ -817,6 +817,33 @@ gtest_main/fast:
 	$(MAKE) -f gtest/gtest/CMakeFiles/gtest_main.dir/build.make gtest/gtest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
+src/PoseExtrapolator/PoseExtrapolator.o: src/PoseExtrapolator/PoseExtrapolator.cpp.o
+
+.PHONY : src/PoseExtrapolator/PoseExtrapolator.o
+
+# target to build an object file
+src/PoseExtrapolator/PoseExtrapolator.cpp.o:
+	$(MAKE) -f CMakeFiles/TestScanOdom.dir/build.make CMakeFiles/TestScanOdom.dir/src/PoseExtrapolator/PoseExtrapolator.cpp.o
+.PHONY : src/PoseExtrapolator/PoseExtrapolator.cpp.o
+
+src/PoseExtrapolator/PoseExtrapolator.i: src/PoseExtrapolator/PoseExtrapolator.cpp.i
+
+.PHONY : src/PoseExtrapolator/PoseExtrapolator.i
+
+# target to preprocess a source file
+src/PoseExtrapolator/PoseExtrapolator.cpp.i:
+	$(MAKE) -f CMakeFiles/TestScanOdom.dir/build.make CMakeFiles/TestScanOdom.dir/src/PoseExtrapolator/PoseExtrapolator.cpp.i
+.PHONY : src/PoseExtrapolator/PoseExtrapolator.cpp.i
+
+src/PoseExtrapolator/PoseExtrapolator.s: src/PoseExtrapolator/PoseExtrapolator.cpp.s
+
+.PHONY : src/PoseExtrapolator/PoseExtrapolator.s
+
+# target to generate assembly for a file
+src/PoseExtrapolator/PoseExtrapolator.cpp.s:
+	$(MAKE) -f CMakeFiles/TestScanOdom.dir/build.make CMakeFiles/TestScanOdom.dir/src/PoseExtrapolator/PoseExtrapolator.cpp.s
+.PHONY : src/PoseExtrapolator/PoseExtrapolator.cpp.s
+
 src/ScanOdom/ScanOdom.o: src/ScanOdom/ScanOdom.cpp.o
 
 .PHONY : src/ScanOdom/ScanOdom.o
@@ -988,6 +1015,9 @@ help:
 	@echo "... gmock"
 	@echo "... gtest"
 	@echo "... gtest_main"
+	@echo "... src/PoseExtrapolator/PoseExtrapolator.o"
+	@echo "... src/PoseExtrapolator/PoseExtrapolator.i"
+	@echo "... src/PoseExtrapolator/PoseExtrapolator.s"
 	@echo "... src/ScanOdom/ScanOdom.o"
 	@echo "... src/ScanOdom/ScanOdom.i"
 	@echo "... src/ScanOdom/ScanOdom.s"

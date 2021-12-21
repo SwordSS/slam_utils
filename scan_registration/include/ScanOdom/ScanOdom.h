@@ -8,13 +8,14 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
 
-
 #include <iostream>
 #include <string>
 #include <memory>
+#include <Eigen/Eigen>
 
 #include "ScanRegis/ScanRegisBase.h"
 #include "ScanRegis/ScanRegisFactory.h"
+#include "PoseExtrapolator/PoseExtrapolator.h"
 
 class ScanOdom
 {
@@ -33,22 +34,22 @@ public:
     void ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg);//后续考虑隔离ROS
     void PublishTFAndOdometry();
 private:
-    void PublishMsg(const Eigen::Matrix4d& real_motion,ros::Time scan_time);
-    void Prediction(const sensor_msgs::LaserScan::ConstPtr &scan_msg,Eigen::Vector3d& predict_motion);
-    void UpdateVelocity(const sensor_msgs::LaserScan::ConstPtr &scan_msg,const Eigen::Vector3d& real_motion);
+    void PublishMsg(const Eigen::Matrix4d& base_in_odom,ros::Time scan_time);
+    void Prediction(const sensor_msgs::LaserScan::ConstPtr &scan_msg,Eigen::Vector3d& v3_predict_motion);
+    void UpdateVelocity(const sensor_msgs::LaserScan::ConstPtr &scan_msg,const Eigen::Vector3d& v3_regis_motion);
 private:
     ros::Subscriber m_scan_sub;
     ros::Publisher  m_odom_pub;
+
     std::shared_ptr<ScanRegisBase> scan_regis_base;
-    sensor_msgs::LaserScan::ConstPtr last_scan_msg;
+    PoseExtrapolator pose_extrapolator;
     ScanOdomStatus scan_odom_status;
-    Eigen::Matrix4d m_base_in_odom;
+
+    sensor_msgs::LaserScan::ConstPtr last_scan_msg;
+
+    Eigen::Matrix4d m_T_base_in_odom;
     tf2_ros::TransformBroadcaster tf_broadcaster;
-
-    int running_flag;
-    Eigen::Vector3d last_velocity;
-    double last_time;
-
+    
 };
 
 

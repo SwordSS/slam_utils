@@ -6,6 +6,12 @@
 
 #IncludeRegexTransform: 
 
+../include/PoseExtrapolator/PoseExtrapolator.h
+Eigen/Eigen
+-
+iostream
+-
+
 ../include/ScanOdom/ScanOdom.h
 ros/ros.h
 -
@@ -23,10 +29,14 @@ string
 -
 memory
 -
+Eigen/Eigen
+-
 ScanRegis/ScanRegisBase.h
 ../include/ScanOdom/ScanRegis/ScanRegisBase.h
 ScanRegis/ScanRegisFactory.h
 ../include/ScanOdom/ScanRegis/ScanRegisFactory.h
+PoseExtrapolator/PoseExtrapolator.h
+../include/ScanOdom/PoseExtrapolator/PoseExtrapolator.h
 
 ../include/ScanRegis/ScanRegisBase.h
 ros/ros.h
@@ -57,6 +67,10 @@ ScanRegis/ScanRegisBase.h
 ../include/ScanRegis/ScanRegis/ScanRegisBase.h
 csm/csm_all.h
 -
+
+/home/yyj/coding_ws/src/slam_utils/scan_registration/src/PoseExtrapolator/PoseExtrapolator.cpp
+PoseExtrapolator/PoseExtrapolator.h
+/home/yyj/coding_ws/src/slam_utils/scan_registration/src/PoseExtrapolator/PoseExtrapolator/PoseExtrapolator.h
 
 /home/yyj/coding_ws/src/slam_utils/scan_registration/src/ScanOdom/ScanOdom.cpp
 ScanOdom/ScanOdom.h
