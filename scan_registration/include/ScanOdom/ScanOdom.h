@@ -33,10 +33,7 @@ public:
 
     void ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg);//后续考虑隔离ROS
     void PublishTFAndOdometry();
-private:
-    void PublishMsg(const Eigen::Matrix4d& base_in_odom,ros::Time scan_time);
-    void Prediction(const sensor_msgs::LaserScan::ConstPtr &scan_msg,Eigen::Vector3d& v3_predict_motion);
-    void UpdateVelocity(const sensor_msgs::LaserScan::ConstPtr &scan_msg,const Eigen::Vector3d& v3_regis_motion);
+
 private:
     ros::Subscriber m_scan_sub;
     ros::Publisher  m_odom_pub;

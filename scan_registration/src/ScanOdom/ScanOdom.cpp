@@ -1,5 +1,9 @@
-
+#include "DebugTools/DebugTools.h"
 #include "ScanOdom/ScanOdom.h"
+
+//debug
+DebugTools debug_tools;
+////
 
 namespace
 {
@@ -23,6 +27,10 @@ ScanOdom::ScanOdom()
     scan_regis_base = ScanRegisFactory::CreateScanRegisMethod(ScanRegisFactory::PLICP);
     m_T_base_in_odom = Eigen::Matrix4d::Identity();
     scan_odom_status = Initialzing;
+
+    //debug
+    debug_tools.Init();
+    ////
 }
 
 void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
@@ -49,29 +57,17 @@ void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
             pose_extrapolator.UpdateVelocity(cur_time,v3_regis_motion);
             Eigen::Matrix4d T_regis_motion;
             VectorToTranform(v3_regis_motion,T_regis_motion);
-            m_T_base_in_odom = m_T_base_in_odom * T_regis_motion;                 
-            PublishMsg(m_T_base_in_odom,scan_msg->header.stamp);
+
+            m_T_base_in_odom = m_T_base_in_odom * T_regis_motion;
+
+            //debug                 
+            debug_tools.PublishTF(m_T_base_in_odom,scan_msg->header.stamp,"odom","base_footprint");
+            debug_tools.PublishPath(m_T_base_in_odom,scan_msg->header.stamp,"odom");
+            debug_tools.WritePath(m_T_base_in_odom,cur_time);
+            ////
+
             scan_regis_base->UpdateRefScan(scan_msg);
         }
         return ;
     }
-}
-
-void ScanOdom::PublishMsg(const Eigen::Matrix4d& T_base_in_odom,ros::Time scan_time)
-{
-    geometry_msgs::TransformStamped tf_odom_to_base;
-    Eigen::Quaterniond q_v = Eigen::Quaterniond(T_base_in_odom.block<3,3>(0,0));
-    tf_odom_to_base.header.stamp = scan_time;
-    tf_odom_to_base.header.frame_id = "odom";
-    tf_odom_to_base.child_frame_id = "laser";
-    tf_odom_to_base.transform.translation.x = T_base_in_odom(0,3);
-    tf_odom_to_base.transform.translation.y = T_base_in_odom(1,3);
-    tf_odom_to_base.transform.translation.z = 0;
-    tf_odom_to_base.transform.rotation.x = q_v.x();
-    tf_odom_to_base.transform.rotation.y = q_v.y();
-    tf_odom_to_base.transform.rotation.z = q_v.z();
-    tf_odom_to_base.transform.rotation.w = q_v.w();
-
-    tf_broadcaster.sendTransform(tf_odom_to_base);
-
 }

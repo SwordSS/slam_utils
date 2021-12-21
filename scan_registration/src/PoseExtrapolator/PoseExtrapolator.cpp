@@ -1,5 +1,6 @@
 #include "PoseExtrapolator/PoseExtrapolator.h"
 
+
 void PoseExtrapolator::Prediction(double cur_time,Eigen::Vector3d& v3_predict_motion)
 {
     if(pose_extrapolator_status==Initialzing)
@@ -10,6 +11,7 @@ void PoseExtrapolator::Prediction(double cur_time,Eigen::Vector3d& v3_predict_mo
     else if(pose_extrapolator_status==Initialzed)
     {
         v3_predict_motion = last_velocity*(cur_time - last_time);
+        std::cout << v3_predict_motion.transpose() << std::endl << std::endl;
         return;
     }
 }

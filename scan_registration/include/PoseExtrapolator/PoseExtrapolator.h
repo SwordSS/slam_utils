@@ -17,7 +17,7 @@ public:
         last_velocity = Eigen::Vector3d::Zero();
         pose_extrapolator_status = Initialzing;
         last_time = 0;
-
+        
     };
     ~PoseExtrapolator(){};
     void Prediction(double cur_time,Eigen::Vector3d& v3_predict_motion);
