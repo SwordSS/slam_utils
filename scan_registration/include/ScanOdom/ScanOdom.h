@@ -2,16 +2,12 @@
 #ifndef _SCANODOM_H
 #define _SCANODOM_H
 
-#include <ros/ros.h>
-#include <sensor_msgs/LaserScan.h>
-#include <nav_msgs/Odometry.h>
-#include <tf2_ros/transform_broadcaster.h>
-#include <geometry_msgs/TransformStamped.h>
-
 #include <iostream>
-#include <string>
 #include <memory>
 #include <Eigen/Eigen>
+
+#include <ros/ros.h>
+#include <sensor_msgs/LaserScan.h>
 
 #include "ScanRegis/ScanRegisBase.h"
 #include "ScanRegis/ScanRegisFactory.h"
@@ -35,6 +31,9 @@ public:
     void PublishTFAndOdometry();
 
 private:
+    bool IsNewKeyframe(const Eigen::Matrix4d& T_base_in_kf);
+
+private:
     ros::Subscriber m_scan_sub;
     ros::Publisher  m_odom_pub;
 
@@ -44,7 +43,9 @@ private:
 
     sensor_msgs::LaserScan::ConstPtr last_scan_msg;
 
+    Eigen::Matrix4d m_T_kf_in_odom;
     Eigen::Matrix4d m_T_base_in_odom;
+
     tf2_ros::TransformBroadcaster tf_broadcaster;
     
 };

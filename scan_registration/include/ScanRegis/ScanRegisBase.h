@@ -5,8 +5,6 @@
 #include <sensor_msgs/LaserScan.h>
 #include <Eigen/Eigen>
 
-
-
 class ScanRegisBase
 {
 public:
