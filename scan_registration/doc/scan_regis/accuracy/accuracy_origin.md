@@ -1,0 +1,11 @@
+# origin
+- 文献题目
+	- On achievable accuracy for range-finder localization
+- 参考文献
+	- [1]GRB用于ICP精确度分析
+	- [2]scan测量模型忽略了tf，颜色，表面材料的函数
+- 疑问
+- 我的想法
+- 思路
+	- Cramér–Rao lower bound来估计估计的精确度下界
+- 摘录

@@ -1,0 +1,46 @@
+# origin
+- 文献题目
+	- An ICP variant using a point-to-line metric
+- 参考文献
+	- [6]IDP，MBICP，以及ICP，IDP，MBICP对比展示
+	- [7][8]点到线的idea都有，使用最小二乘方法来解
+	- [9]检出外点流程
+	- [10]证明了PLICP是二次收敛，ICP是一次收敛
+	- [12]GPM,用于第一次收敛
+- 疑问
+- 我的想法
+- 思路
+	- ICP的缺点
+		- 基于一个大的初始误差会收敛于一个错误的配准
+		- 对应的搜索是很昂贵的
+		- 收敛很慢
+		- 异常值很常见
+		- 按目前来看，不太符合概率框架
+	- 本文贡献
+		- 相较于点到点的方法，提出了点到线的方法
+		- 提出了计算对应的优化算法
+			- 点对线度量的使用和算法优化允许PLICP在Pentium IV 1.8GhZ的典型数据(360射线扫描)上以超过500次每秒匹配的速度运行。
+	- PLICP算法流程
+		- 使用上一刻变换变换当前帧点
+		- 找集合，找到关于参考帧的最近两个点，形成集合
+		- 使用修剪过程排除外点
+		- 改写误差方程（3）
+		- 使用附录1计算（5）
+
+- 摘录
+	- The method is validated against vanilla ICP, IDC (Iterative Dual Correspondences), and MBICP (Metric-Based ICP) by reproducing the experiments performed in Minguezet al.(2006)
+		- 通过重现Minguezet et al.(2006)的实验，该方法对传统的ICP、IDC(迭代对偶对应关系)和MBICP(基于度量的ICP)进行了验证。
+	- The experiments suggest that PLICP is more precise, and requires less iterations. However, it is less robust to very large initial displacement errors. The last part of the paper is devoted to purely algorithmic optimization of the correspondence search; this allows for a significant speed-up of the computation. The source code is available for download.
+		- 实验表明，PLICP具有更高的精度和更少的迭代次数。然而，它对非常大的初始位移误差的鲁棒性较差。论文的最后一部分是纯算法优化的通信搜索;这可以显著提高计算速度。源代码可以下载。
+	- After its introduction, many ICP variants have been investigated, because the core algorithm can be slightly modified in many ways: which subset of points to use, how to define the error metric, how to discard outliers, etc — see [1] for a short survey of the popular variants used in the vision community.
+		- 推出之后,许多ICP变异进行了调查,因为核心算法在很多方面可以稍微修改:使用哪个点的子集,如何定义误差度量,如何摒弃异常值等,看到一个简短的调查[1]中使用的流行变种愿景社区。
+	- Specialization of the ICP in the robotics community have flourished [2], [3], [4], [5], [6];
+		- 机器人社区的ICP专业化已经繁荣了[2]，[3]，[4]，[5]，[6];
+	- This paper introduces (in Appendix I) an exact closed-form solution to (3) in the planar case.
+		- 本文在附录I中引入了(3)在平面情况下的精确闭合解。
+	- Using the point-to-line metric,andan exact solution, drastically improves the convergence properties of the algorithm: PLICP has quadratic convergence instead of the linear convergence of vanilla ICP .
+		- 采用点对线度量和精确解，极大地改善了算法的收敛性:PLICP具有二次收敛性而不是传统ICP的线性收敛性。
+	- As an experimental validation, this paper reproduces the experiments performed in [6], so that a direct comparison with ICP, IDC, and MBICP will be possible.
+		- 作为实验验证，本文再现了在[6]中进行的实验，从而可以与ICP、IDC和MBICP进行直接比较。
+	- On the test data, the use of the point-to-line metric and the algorithmic optimizations allow PLICP to run at more than 500 matchings per second on a Pentium IV 1.8GhZ for typical data (360-ray scans).
+		- 在测试数据上，点对线度量的使用和算法优化允许PLICP在Pentium IV 1.8GhZ的典型数据(360射线扫描)上以超过500次每秒匹配的速度运行。
