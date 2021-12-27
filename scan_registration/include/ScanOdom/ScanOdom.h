@@ -45,8 +45,6 @@ private:
 
     Eigen::Matrix4d m_T_kf_in_odom;
     Eigen::Matrix4d m_T_base_in_odom;
-
-    tf2_ros::TransformBroadcaster tf_broadcaster;
     
 };
 

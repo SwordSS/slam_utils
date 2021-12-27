@@ -1,0 +1,13 @@
+<launch>
+    <arg name="bag_filename" default="/home/yyj/data/OpenLORIS/cafe1-1.bag"/>
+
+    <param name="use_sim_time" value="true" />
+
+    <node name="gt_write_show"
+        pkg="gt_write_show" type="gt_write_show" output="screen" >
+    </node>
+
+    <node name="playbag" pkg="rosbag" type="play"
+        args="--clock $(arg bag_filename)" />
+
+</launch>
