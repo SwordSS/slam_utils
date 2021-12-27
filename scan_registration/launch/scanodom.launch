@@ -1,14 +1,20 @@
 <launch>
-
-    <!-- base_link to front_laser_link -->
-    <node pkg="tf2_ros" type="static_transform_publisher" name="link_broadcaster" 
-        args="0 0 0 0 0 0 base_footprint laser" />
+    <!-- 使用bag的时间戳 -->
+    <param name="use_sim_time" value="true" />
 
     <!-- bag的地址与名称 -->
     <arg name="bag_filename" default="/home/yyj/data/OpenLORIS/cafe1-1.bag"/>
-
-    <!-- 使用bag的时间戳 -->
-    <param name="use_sim_time" value="true" />
+    
+    <!-- base_link to front_laser_link -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="link_broadcaster" 
+        args="0.14350911105 
+              -0.0964248846142 
+              0.998048618989 
+              0.00794676373317 
+              0.0182929448264
+              0.000830866947977 
+              0.999800743536 
+              base_footprint laser" />
 
     <!-- 启动 plicp_odometry 节点 -->
     <node name="TestScanOdom"

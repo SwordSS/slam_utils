@@ -1,4 +1,6 @@
-#include "DebugTools/DebugTools.h"
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/TransformStamped.h>
+#include "DebugTools/DebugTools.h"//这个必须放这里
 #include "ScanOdom/ScanOdom.h"
 
 //debug
@@ -15,6 +17,32 @@ namespace
         T_output(0,3) = v3_input(0);
         T_output(1,3) = v3_input(1);
     }
+
+    bool GetLaserInBase(const sensor_msgs::LaserScan::ConstPtr &scan_msg,Eigen::Matrix4d& T_laser_in_base)
+    {
+        tf2_ros::Buffer tfBuffer;
+        tf2_ros::TransformListener tfListener(tfBuffer);
+        try
+        {
+            geometry_msgs::TransformStamped tf_laser_in_base = 
+                    tfBuffer.lookupTransform("base_footprint", "laser", scan_msg->header.stamp,ros::Duration(1.0));
+            Eigen::Quaterniond q(tf_laser_in_base.transform.rotation.w,
+                                 tf_laser_in_base.transform.rotation.x,
+                                 tf_laser_in_base.transform.rotation.y,
+                                 tf_laser_in_base.transform.rotation.z) ;
+            T_laser_in_base.block<3,3>(0,0) = q.toRotationMatrix();
+            T_laser_in_base(0,3) = tf_laser_in_base.transform.translation.x;
+            T_laser_in_base(1,3) = tf_laser_in_base.transform.translation.y;
+            T_laser_in_base(2,3) = tf_laser_in_base.transform.translation.z;
+            return true;
+        }
+        catch (tf2::TransformException &ex)
+        {
+            ROS_ERROR("%s",
+                    ex.what());
+            return false;
+        }
+    }
 }
 
 
@@ -25,8 +53,9 @@ ScanOdom::ScanOdom()
     m_scan_sub = node_handle.subscribe(
         "/scan", 1, &ScanOdom::ScanCallback, this);
     scan_regis_base = ScanRegisFactory::CreateScanRegisMethod(ScanRegisFactory::PLICP);
-    m_T_kf_in_odom = Eigen::Matrix4d::Identity();
-    m_T_base_in_odom = Eigen::Matrix4d::Identity();
+    m_T_laser_in_base = Eigen::Matrix4d::Identity();
+    m_T_baseKF_in_odom = Eigen::Matrix4d::Identity();
+    m_T_baseNKF_in_odom = Eigen::Matrix4d::Identity();
     scan_odom_status = Initialzing;
 
     //debug
@@ -39,9 +68,15 @@ void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
     if(scan_odom_status==Initialzing)
     {
         last_scan_msg = scan_msg;
-        scan_regis_base->Init(scan_msg);
-        scan_regis_base->UpdateRefScan(scan_msg);
-        scan_odom_status = Initialzed;
+        scan_regis_base->Init(scan_msg);//这些行为后续可能也会出现判断情况
+        scan_regis_base->UpdateRefScan(scan_msg);//这些行为后续可能也会出现判断情况
+        bool b_tf_flag = GetLaserInBase(scan_msg,m_T_laser_in_base);//这些行为后续可能也会出现判断情况
+
+
+        if(b_tf_flag)
+        {
+            scan_odom_status = Initialzed;
+        }
         return ;
     }
     else if(scan_odom_status == Initialzed)
@@ -55,22 +90,24 @@ void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
 
         if (regis_successed)
         {
-            Eigen::Matrix4d T_base_in_kf;
-            VectorToTranform(v3_regis_motion,T_base_in_kf);
+            Eigen::Matrix4d T_laserNKF_in_laserKF;
+            VectorToTranform(v3_regis_motion,T_laserNKF_in_laserKF);
+            
 
-            m_T_base_in_odom = m_T_kf_in_odom *T_base_in_kf;
+            m_T_baseNKF_in_odom = m_T_baseKF_in_odom*m_T_laser_in_base*T_laserNKF_in_laserKF*m_T_laser_in_base.inverse();
+            std::cout << m_T_baseNKF_in_odom <<std::endl<<std::endl;
 
             //debug                 
-            debug_tools.PublishTF(m_T_base_in_odom,scan_msg->header.stamp,"odom","base_footprint");
-            debug_tools.PublishPath(m_T_base_in_odom,scan_msg->header.stamp,"odom");
-            debug_tools.WritePath(m_T_base_in_odom,cur_time);
+            debug_tools.PublishTF(m_T_baseNKF_in_odom,scan_msg->header.stamp,"odom","base_footprint");
+            debug_tools.PublishPath(m_T_baseNKF_in_odom,scan_msg->header.stamp,"odom");
+            debug_tools.WritePath(m_T_baseNKF_in_odom,cur_time);
             ////
 
-            if(IsNewKeyframe(T_base_in_kf))
+            if(IsNewKeyframe(T_laserNKF_in_laserKF))
             {
                 pose_extrapolator.UpdateVelocity(cur_time,v3_regis_motion);//这部分与关键帧机制相关
                 scan_regis_base->UpdateRefScan(scan_msg);
-                m_T_kf_in_odom = m_T_base_in_odom;
+                m_T_baseKF_in_odom = m_T_baseNKF_in_odom;
             }
         }
         return ;
@@ -98,3 +135,4 @@ bool ScanOdom::IsNewKeyframe(const Eigen::Matrix4d& T_base_in_kf)
     // return false;
     return true;
 }
+

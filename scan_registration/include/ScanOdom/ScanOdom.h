@@ -9,6 +9,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 
+
 #include "ScanRegis/ScanRegisBase.h"
 #include "ScanRegis/ScanRegisFactory.h"
 #include "PoseExtrapolator/PoseExtrapolator.h"
@@ -43,9 +44,11 @@ private:
 
     sensor_msgs::LaserScan::ConstPtr last_scan_msg;
 
-    Eigen::Matrix4d m_T_kf_in_odom;
-    Eigen::Matrix4d m_T_base_in_odom;
-    
+    Eigen::Matrix4d m_T_laser_in_base;
+
+    Eigen::Matrix4d m_T_baseKF_in_odom;
+    Eigen::Matrix4d m_T_baseNKF_in_odom;
+
 };
 
 
