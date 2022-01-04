@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC   -shared -Wl,-soname,libgtest.so -o libgtest.so CMakeFiles/gtest.dir/src/gtest-all.cc.o  -L/home/yyj/coding_ws/src/slam_utils/scan_registration/build/gtest/gtest/src -Wl,-rpath,/home/yyj/coding_ws/src/slam_utils/scan_registration/build/gtest/gtest/src -lpthread 
+/usr/bin/c++ -fPIC -g  -shared -Wl,-soname,libgtest.so -o libgtest.so CMakeFiles/gtest.dir/src/gtest-all.cc.o  -L/home/yyj/coding_ws/src/slam_utils/scan_registration/build/gtest/gtest/src -Wl,-rpath,/home/yyj/coding_ws/src/slam_utils/scan_registration/build/gtest/gtest/src -lpthread 

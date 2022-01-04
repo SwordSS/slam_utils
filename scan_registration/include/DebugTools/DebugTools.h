@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <map>
+#include <ctime>
 
 #include <Eigen/Eigen>
 
 #include <ros/ros.h>
-#include <string>
 #include <nav_msgs/Path.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -87,6 +89,24 @@ public:
                                << q_v.y()   << " "
                                << q_v.z()   << " "
                                << q_v.w()   << "\n";
+        }
+    }
+
+    void CalTimer(int number_timer,std::string print_str)
+    {
+        static std::map<int,clock_t> map_timer;
+        std::map<int,clock_t>::iterator itr = map_timer.find(number_timer);
+        if(itr!=map_timer.end())
+        {
+            clock_t begin = itr->second;
+            clock_t end = clock();
+            map_timer.erase(number_timer);
+            std::cout << print_str << "'s time is " << float(end-begin)/CLOCKS_PER_SEC <<std::endl;
+        }
+        else
+        {
+            clock_t begin = clock();
+            map_timer.insert(std::pair<int,clock_t>(number_timer,begin));
         }
     }   
 

@@ -93,13 +93,12 @@ void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
         if (regis_successed)
         {
             Eigen::Matrix4d T_laserNKFG_in_laserKFG;
+
             VectorToTranform(v3_regis_motion,T_laserNKFG_in_laserKFG);
 
             m_T_baseNKF_in_odom = m_T_baseKF_in_odom*m_T_laserG_in_base*
                                     T_laserNKFG_in_laserKFG*
                                     m_T_laserG_in_base.inverse();
-
-            std::cout << m_T_baseNKF_in_odom << std::endl;
 
             //debug                 
             debug_tools.PublishTF(m_T_baseNKF_in_odom,scan_msg->header.stamp,"odom","base_footprint");
