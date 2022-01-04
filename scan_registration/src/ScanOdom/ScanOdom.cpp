@@ -56,6 +56,8 @@ ScanOdom::ScanOdom()
     m_T_laser_in_base = Eigen::Matrix4d::Identity();
     m_T_baseKF_in_odom = Eigen::Matrix4d::Identity();
     m_T_baseNKF_in_odom = Eigen::Matrix4d::Identity();
+    m_T_laserG_in_base = m_T_laser_in_base;
+    m_T_laserG_in_base.block<3,3>(0,0) = Eigen::Matrix3d::Identity();
     scan_odom_status = Initialzing;
 
     //debug
@@ -90,12 +92,14 @@ void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
 
         if (regis_successed)
         {
-            Eigen::Matrix4d T_laserNKF_in_laserKF;
-            VectorToTranform(v3_regis_motion,T_laserNKF_in_laserKF);
-            
+            Eigen::Matrix4d T_laserNKFG_in_laserKFG;
+            VectorToTranform(v3_regis_motion,T_laserNKFG_in_laserKFG);
 
-            m_T_baseNKF_in_odom = m_T_baseKF_in_odom*m_T_laser_in_base*T_laserNKF_in_laserKF*m_T_laser_in_base.inverse();
-            std::cout << m_T_baseNKF_in_odom <<std::endl<<std::endl;
+            m_T_baseNKF_in_odom = m_T_baseKF_in_odom*m_T_laserG_in_base*
+                                    T_laserNKFG_in_laserKFG*
+                                    m_T_laserG_in_base.inverse();
+
+            std::cout << m_T_baseNKF_in_odom << std::endl;
 
             //debug                 
             debug_tools.PublishTF(m_T_baseNKF_in_odom,scan_msg->header.stamp,"odom","base_footprint");
@@ -103,7 +107,7 @@ void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
             debug_tools.WritePath(m_T_baseNKF_in_odom,cur_time);
             ////
 
-            if(IsNewKeyframe(T_laserNKF_in_laserKF))
+            if(IsNewKeyframe(T_laserNKFG_in_laserKFG))
             {
                 pose_extrapolator.UpdateVelocity(cur_time,v3_regis_motion);//这部分与关键帧机制相关
                 scan_regis_base->UpdateRefScan(scan_msg);
@@ -116,23 +120,23 @@ void ScanOdom::ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
 
 bool ScanOdom::IsNewKeyframe(const Eigen::Matrix4d& T_base_in_kf)
 {
-    // static int scan_count_ = 0;
-    // scan_count_++;
+    static int scan_count_ = 0;
+    scan_count_++;
 
-    // if (T_base_in_kf.block<3,3>(0,0).eulerAngles(2,1,0)(0) > 0.0523)
-    //     return true;
+    if (T_base_in_kf.block<3,3>(0,0).eulerAngles(2,1,0)(0) > 0.0523)
+        return true;
 
-    // if (scan_count_ == 10)
-    // {
-    //     scan_count_ = 0;
-    //     return true;
-    // }
+    if (scan_count_ == 10)
+    {
+        scan_count_ = 0;
+        return true;
+    }
         
-    // double x = T_base_in_kf(0,3);
-    // double y = T_base_in_kf(1,3);
-    // if (x * x + y * y > 1)
-    //     return true;
-    // return false;
-    return true;
+    double x = T_base_in_kf(0,3);
+    double y = T_base_in_kf(1,3);
+    if (x * x + y * y > 1)
+        return true;
+    return false;
+    //return true;
 }
 

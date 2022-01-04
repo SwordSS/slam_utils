@@ -48,6 +48,7 @@ private:
 
     Eigen::Matrix4d m_T_baseKF_in_odom;
     Eigen::Matrix4d m_T_baseNKF_in_odom;
+    Eigen::Matrix4d m_T_laserG_in_base;
 
 };
 
