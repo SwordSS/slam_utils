@@ -6,13 +6,16 @@
 #include <memory>
 #include <Eigen/Eigen>
 
+
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 
-
+#include "SliceDeque/SliceDeque.h"
 #include "ScanRegis/ScanRegisBase.h"
 #include "ScanRegis/ScanRegisFactory.h"
 #include "PoseExtrapolator/PoseExtrapolator.h"
+
+
 
 class ScanOdom
 {
@@ -28,7 +31,7 @@ public:
     ScanOdom();
     ~ScanOdom(){};
 
-    void ScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg);//后续考虑隔离ROS
+    void Run();//后续考虑隔离ROS
     void PublishTFAndOdometry();
 
 private:
@@ -37,14 +40,14 @@ private:
 private:
     ros::Subscriber m_scan_sub;
     ros::Publisher  m_odom_pub;
+    SliceDeque m_slice_queue;
+    std::thread m_thread_run;
 
     std::shared_ptr<ScanRegisBase> scan_regis_base;
     PoseExtrapolator pose_extrapolator;
     ScanOdomStatus scan_odom_status;
 
-    sensor_msgs::LaserScan::ConstPtr last_scan_msg;
-
-    Eigen::Matrix4d m_T_laser_in_base;
+    sensor_msgs::LaserScanConstPtr last_scan_msg;
 
     Eigen::Matrix4d m_T_baseKF_in_odom;
     Eigen::Matrix4d m_T_baseNKF_in_odom;

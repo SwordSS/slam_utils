@@ -3,10 +3,10 @@
     <param name="use_sim_time" value="true" />
 
     <!-- bag的地址与名称 -->
-    <arg name="bag_filename" default="/home/yyj/data/OpenLORIS/cafe1-1.bag"/>
+    <arg name="bag_filename" default="/home/yyj/data/practice_work/indoor_01.bag"/>
     
     <!-- base_link to front_laser_link -->
-    <node pkg="tf2_ros" type="static_transform_publisher" name="link_broadcaster" 
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="link_broadcaster" 
         args="0.14350911105 
               -0.0964248846142 
               0.998048618989 
@@ -14,6 +14,14 @@
               0.0182929448264
               0.000830866947977 
               0.999800743536 
+              base_footprint laser" /> -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="link_broadcaster" 
+        args="0.14350911105
+              -0.0964248846142 
+              0.998048618989
+              0 
+              0
+              0 
               base_footprint laser" />
 
     <!-- 启动 plicp_odometry 节点 -->
@@ -27,6 +35,6 @@
 
     <!-- play bagfile -->
     <node name="playbag" pkg="rosbag" type="play"
-        args="--clock $(arg bag_filename) --topics /scan" />
+        args="--clock $(arg bag_filename) --topics /scan /odom /imu" />
 
 </launch>

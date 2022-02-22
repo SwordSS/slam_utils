@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   sensor_msgs
+  nav_msgs
   geometry_msgs
   tf2_ros
 )
@@ -160,6 +161,7 @@ add_executable(TestScanOdom
                 src/ScanOdom/ScanOdom.cpp
                 src/ScanOdom/ScanRegisWithPLICP.cpp
                 src/PoseExtrapolator/PoseExtrapolator.cpp
+                src/SliceDeque/SliceDeque.cpp
                 )
 target_link_libraries(TestScanOdom
    ${catkin_LIBRARIES}
