@@ -88,7 +88,7 @@ class SliceDeque
         {
             std::unique_lock<std::mutex> buf_lock(m_buf_mutex);
             m_scan_buf.push_back(scan_msg_ptr);
-            m_buf_mutex.unlock();
+            //m_buf_mutex.unlock();
             
             //question 打印机制(有问题，1.0改成2.0差了一半)
             {
@@ -110,14 +110,14 @@ class SliceDeque
         {
             std::unique_lock<std::mutex> buf_lock(m_buf_mutex);
             m_odom_buf.push_back(odom_msg_ptr);
-            m_buf_mutex.unlock();
+            //m_buf_mutex.unlock();
         }
 
         void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg_ptr)
         {
             std::unique_lock<std::mutex> buf_lock(m_buf_mutex);
             m_imu_buf.push_back(imu_msg_ptr);
-            m_buf_mutex.unlock();
+            //m_buf_mutex.unlock();
         }
 
         void SliceProcess();

@@ -11,11 +11,11 @@ void SliceDeque::SliceProcess()
         {
             //观察输入输出（生产与消费的速度）是否跟得上
             #if USE_ASSERT
-                std::unique_lock<std::mutex> buf_lock(m_buf_mutex);
+                std::lock_guard<std::mutex> buf_lock(m_buf_mutex);
                 int scan_buf_size = m_scan_buf.size();
                 int odom_buf_size = m_odom_buf.size();
                 int imu_buf_size  = m_imu_buf.size();
-                buf_lock.unlock();
+                //buf_lock.unlock();
                 int max_size = 50000;
                 
                 if(scan_buf_size >= max_size)
@@ -43,7 +43,7 @@ void SliceDeque::SliceProcess()
         }
         
         ScanSliceBag cur_bag;//用于外发的激光切片包，每个激光数据左右必定都有imu与odom存在
-        std::unique_lock<std::mutex> buf_lock(m_buf_mutex);
+        std::lock_guard<std::mutex> buf_lock(m_buf_mutex);
         //step1：若所有队列不是全部都有数据，则等待
         if(m_odom_buf.empty()||m_imu_buf.empty()||m_scan_buf.empty())
         {
@@ -117,9 +117,10 @@ void SliceDeque::SliceProcess()
                 }
                 else continue;
             }
+            std::lock_guard<std::mutex> ScanSliceBag_lock(m_ScanSliceBag_mutex);
             m_ScanSliceBag_queue.push_back(cur_bag);
         }
-        buf_lock.unlock();
+        //buf_lock.unlock();
 
         //输出后置判断，可以根据USE_ASSERT开启关闭对应部分
         {

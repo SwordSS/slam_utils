@@ -8,7 +8,7 @@
     </node>
 
     <!-- launch rviz -->
-    <node name="rviz" pkg="rviz" type="rviz" required="true"
-        args="-d $(find scan_registration)/config/rviz_config.rviz" />
+    <!--node name="rviz" pkg="rviz" type="rviz" required="true"
+        args="-d $(find scan_registration)/config/rviz_config.rviz" /-->
 
 </launch>
