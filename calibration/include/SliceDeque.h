@@ -91,7 +91,7 @@ class SliceDeque
         {
             std::unique_lock<std::mutex> buf_lock(m_buf_mutex);
             m_scan_buf.push_back(scan_msg_ptr);
-            m_buf_mutex.unlock();
+            //m_buf_mutex.unlock();
             
             //question 打印机制(有问题，1.0改成2.0差了一半)
             {
@@ -113,14 +113,14 @@ class SliceDeque
         {
             std::unique_lock<std::mutex> buf_lock(m_buf_mutex);
             m_odom_buf.push_back(odom_msg_ptr);
-            m_buf_mutex.unlock();
+            //m_buf_mutex.unlock();
         }
 
         void ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg_ptr)
         {
             std::unique_lock<std::mutex> buf_lock(m_buf_mutex);
             m_imu_buf.push_back(imu_msg_ptr);
-            m_buf_mutex.unlock();
+            //m_buf_mutex.unlock();
         }
 
         void SliceProcess();
@@ -164,7 +164,7 @@ void SliceDeque::SliceProcess()
                 int scan_buf_size = m_scan_buf.size();
                 int odom_buf_size = m_odom_buf.size();
                 int imu_buf_size  = m_imu_buf.size();
-                buf_lock.unlock();
+                //buf_lock.unlock();
                 int max_size = 50000;
                 
                 if(scan_buf_size >= max_size)
@@ -268,7 +268,7 @@ void SliceDeque::SliceProcess()
             }
             m_ScanSliceBag_queue.push_back(cur_bag);
         }
-        buf_lock.unlock();
+        //buf_lock.unlock();
 
         //输出后置判断，可以根据USE_ASSERT开启关闭对应部分
         {
